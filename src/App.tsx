@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Play, RotateCcw, Crown, AlertTriangle, Fingerprint, Smile, Sparkles, User, Key, Search } from 'lucide-react';
+import { EyeOff, Play, RotateCcw, Crown, AlertTriangle, Fingerprint, Smile, Sparkles, User, Key, Search } from 'lucide-react';
 
 // --- ARABIC WORD LIST ---
 const WORD_LIST = [
