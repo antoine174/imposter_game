@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Play, RotateCcw, Crown, AlertTriangle, Fingerprint, Smile, Sparkles, Key, Users, UserMinus, Search, Tag, Coffee, Shirt, Flame, ChevronDown, X, Grid } from 'lucide-react';
+import { EyeOff, Play, RotateCcw, Crown, AlertTriangle, Fingerprint, Smile, Sparkles, Key, Users, UserMinus, Search, Tag, Coffee, Shirt, Flame, ChevronDown, X, Grid } from 'lucide-react';
 
 // --- CATEGORIES & WORD LISTS ---
 const CATEGORIES = {
