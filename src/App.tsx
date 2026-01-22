@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { EyeOff, Play, RotateCcw, Crown, AlertTriangle, Fingerprint, Smile, Sparkles, User, Key, Search } from 'lucide-react';
+// REMOVED "User" from imports. Kept "Users" (plural) which is actually used.
+import {EyeOff, Play, RotateCcw, Crown, AlertTriangle, Fingerprint, Smile, Sparkles, Key, Users, UserMinus, Search } from 'lucide-react';
 
 // --- ARABIC WORD LIST ---
 const WORD_LIST = [
   'صبي رقاصه', 'اندومي', 'مصاصه', 'قصب', 'مخدرات', 
-  'اختبار حمل', 'نوم', 'مصيف', 'توك توك', 'شبشب', 'كوارع', 'سيجارة فرط', 'ميكروباص',
+  'اختبار حمل', 'نوم', 'مصيف',  'توك توك', 'شبشب', 'كوارع', 'سيجارة فرط', 'ميكروباص',
   'فشار', 'بطيخ', 'مرجيحة', 'حلاق', 'جيم', 'شاحن'
 ];
 
@@ -19,6 +20,7 @@ interface Player {
 const App = () => {
   const [gameState, setGameState] = useState<GameState>('SETUP');
   const [playerCount, setPlayerCount] = useState<number | string>(5);
+  const [imposterCount, setImposterCount] = useState<number | string>(1);
   const [customWord, setCustomWord] = useState<string>('');
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState<number>(0);
@@ -27,15 +29,33 @@ const App = () => {
   // --- ACTIONS ---
   const startGame = () => {
     const count = typeof playerCount === 'string' ? parseInt(playerCount) : playerCount;
+    const iCount = typeof imposterCount === 'string' ? parseInt(imposterCount) : imposterCount;
+
+    // Validation
     if (!count || count < 3) {
       alert("لازم على الأقل 3 لعيبة!");
       setPlayerCount(3);
       return;
     }
 
+    if (!iCount || iCount < 1) {
+      alert("لازم يكون فيه امبوستر واحد على الأقل!");
+      setImposterCount(1);
+      return;
+    }
+
+    if (iCount > count) {
+      alert(`مينفعش عدد الامبوستر (${iCount}) يبقى قد أو أكبر من عدد اللعيبة (${count})!`);
+      return;
+    }
+
     const secretWord = customWord.trim() || WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
     const roles: ('imposter' | 'civilian')[] = Array(count).fill('civilian');
-    roles[0] = 'imposter'; 
+    
+    // Fill imposters
+    for (let i = 0; i < iCount; i++) {
+      roles[i] = 'imposter';
+    }
 
     // Shuffle
     for (let i = roles.length - 1; i > 0; i--) {
@@ -57,8 +77,6 @@ const App = () => {
   const handleNextPlayer = (e: React.MouseEvent) => {
     e.stopPropagation(); 
     setIsFlipped(false);
-    
-    // Wait for flip animation
     setTimeout(() => {
       if (currentPlayerIndex + 1 < players.length) {
         setCurrentPlayerIndex(prev => prev + 1);
@@ -96,7 +114,6 @@ const App = () => {
           transform-style: preserve-3d; 
         }
         .card-object.is-flipped { transform: rotateY(180deg); }
-        
         .card-face { 
           position: absolute; 
           inset: 0;
@@ -111,18 +128,12 @@ const App = () => {
           justify-content: center; 
           box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        
-        /* Solid colors to prevent ghosting */
-        .card-front-bg { background-color: #2563eb; } /* Blue */
-        .card-back-imposter { background-color: #dc2626; } /* Red */
-        .card-back-civilian { background-color: #059669; } /* Green */
-        
+        .card-front-bg { background-color: #2563eb; }
+        .card-back-imposter { background-color: #dc2626; }
+        .card-back-civilian { background-color: #059669; }
         .card-face-back { transform: rotateY(180deg); }
-        
         input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-          -webkit-appearance: none; margin: 0; 
-        }
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
       `}</style>
 
       {/* --- 1. SETUP SCREEN --- */}
@@ -135,22 +146,42 @@ const App = () => {
           <p className="text-gray-400 text-lg mb-8 font-medium">مين فينا الكداب؟ 😉</p>
 
           <div className="w-full bg-gray-800/90 backdrop-blur-md p-6 rounded-3xl border border-gray-700 shadow-2xl">
-            <div className="mb-6">
-              <label className="flex items-center gap-2 text-lg font-bold text-gray-300 mb-2">
-                <User className="text-yellow-400" size={20} />
-                عدد اللعيبه
-              </label>
-              <input 
-                type="number" min="3" max="50"
-                value={playerCount}
-                onChange={(e) => setPlayerCount(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-600 rounded-xl p-4 text-center text-3xl font-black text-white focus:outline-none focus:border-yellow-500 transition-all placeholder-gray-600"
-                placeholder="5"
-              />
+            
+            <div className="flex gap-4 mb-6">
+              {/* Player Count */}
+              <div className="flex-1">
+                <label className="flex items-center gap-2 text-sm md:text-base font-bold text-gray-300 mb-2">
+                  <Users className="text-blue-400" size={18} />
+                  اللعيبة
+                </label>
+                <input 
+                  type="number" min="3" max="50"
+                  value={playerCount}
+                  onChange={(e) => setPlayerCount(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-center text-2xl font-black text-white focus:outline-none focus:border-blue-500 transition-all placeholder-gray-600"
+                  placeholder="5"
+                />
+              </div>
+
+              {/* Imposter Count */}
+              <div className="flex-1">
+                <label className="flex items-center gap-2 text-sm md:text-base font-bold text-gray-300 mb-2">
+                  <UserMinus className="text-red-400" size={18} />
+                  امبوستر
+                </label>
+                <input 
+                  type="number" min="1" max="20"
+                  value={imposterCount}
+                  onChange={(e) => setImposterCount(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-center text-2xl font-black text-white focus:outline-none focus:border-red-500 transition-all placeholder-gray-600"
+                  placeholder="1"
+                />
+              </div>
             </div>
+
             <div className="mb-8">
-               <label className="flex items-center gap-2 text-lg font-bold text-gray-300 mb-2">
-                <Key className="text-purple-400" size={20} />
+               <label className="flex items-center gap-2 text-sm md:text-base font-bold text-gray-300 mb-2">
+                <Key className="text-purple-400" size={18} />
                 كلمة سر (اختياري)
               </label>
               <input 
@@ -160,6 +191,7 @@ const App = () => {
                 className="w-full bg-gray-900 border border-gray-600 rounded-xl p-4 text-center text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-all"
               />
             </div>
+            
             <button onClick={startGame} className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-2xl text-xl shadow-lg flex items-center justify-center gap-3 active:scale-95 transition-transform">
               <Play fill="black" size={24} /> يلا نبدأ
             </button>
@@ -167,7 +199,7 @@ const App = () => {
         </div>
       )}
 
-      {/* --- 2. PLAYING SCREEN (CARD FLIP) --- */}
+      {/* --- 2. PLAYING SCREEN --- */}
       {gameState === 'PLAY_LOOP' && (
         <div className="flex-grow flex flex-col items-center justify-center p-4 scene z-10 w-full">
           <div className="mb-4 text-center shrink-0">
@@ -181,7 +213,6 @@ const App = () => {
           >
             <div className={`card-object ${isFlipped ? 'is-flipped' : ''}`}>
               
-              {/* FRONT FACE (SOLID BLUE) */}
               <div className="card-face card-front-bg border-4 border-white/10">
                  <div className="bg-white/20 p-5 rounded-full mb-4 backdrop-blur-sm animate-pulse">
                    <Fingerprint size={56} className="text-white" />
@@ -196,7 +227,6 @@ const App = () => {
                  </div>
               </div>
 
-              {/* BACK FACE (SOLID RED/GREEN) */}
               <div className={`card-face card-face-back border-4 border-white/10 ${
                 players[currentPlayerIndex].role === 'imposter' ? 'card-back-imposter' : 'card-back-civilian'
               }`}>
@@ -230,7 +260,7 @@ const App = () => {
         </div>
       )}
 
-      {/* --- 3. GAME OVER SCREEN (FIXED OVERLAY) --- */}
+      {/* --- 3. GAME OVER SCREEN --- */}
       {gameState === 'FINISHED' && (
         <div className="fixed inset-0 z-[9999] bg-gray-900 flex flex-col items-center justify-center p-6 text-center w-full h-full">
            <div className="mb-6 animate-bounce">
@@ -242,11 +272,9 @@ const App = () => {
            </h1>
            
            <div className="bg-gray-800 p-6 rounded-3xl border border-gray-700 shadow-2xl mb-12 w-full max-w-sm">
-             <p className="text-xl leading-relaxed text-gray-200 font-medium">
-               الكل شاف كلمته.. <br/>
-               ماعدا واحد بس مش عارف حاجة.<br/>
-               <span className="text-yellow-400 font-black text-3xl mt-4 block">طلعوه برة! 🫵</span>
-             </p>
+             <span className="text-yellow-400 font-black text-3xl mt-4 block">
+  يلا ابدأوا اللعب! 🗣️🔥
+</span>
            </div>
            
            <button 
